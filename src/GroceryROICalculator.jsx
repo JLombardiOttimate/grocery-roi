@@ -267,11 +267,12 @@ export default function GroceryROICalculator() {
     if (f6Total > 0) formulaRows.push(row("F6: Multi-Store Scalability", fmtFull(f6Total)));
 
     const html = `<!DOCTYPE html><html><head><title>Margin Defense Summary - ${prospectName || 'Prospect'}</title>
-<style>body{font-family:Segoe UI,system-ui,sans-serif;margin:40px;color:#0f172a}h1{font-size:22px;margin:0}h2{font-size:14px;color:#64748b;margin:4px 0 24px 0;font-weight:400}.meta{font-size:12px;color:#64748b;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:24px}.section-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;padding:12px 0 6px 0;border-bottom:2px solid #0f172a;margin-top:16px}.highlight{background:#f0fdf4;border:2px solid #22c55e;border-radius:8px;padding:16px;margin:20px 0;text-align:center}.highlight .big{font-size:28px;font-weight:800;color:#16a34a}.highlight .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px}.multiplier{background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:16px;margin:20px 0}.multiplier .big{font-size:22px;font-weight:800;color:#2563eb}.multiplier p{font-size:12px;color:#475569;margin:6px 0 0 0}.footer{margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center}
-@media print{body{margin:20px}.highlight,.multiplier{break-inside:avoid}}</style></head><body>
-<h1>Ottimate Margin Defense Summary</h1>
-<h2>${pathNames[path]}</h2>
-<div class="meta">Prepared for: <strong>${prospectName || '[Prospect Name]'}</strong> &nbsp;|&nbsp; Date: ${new Date().toLocaleDateString()} &nbsp;|&nbsp; Time-to-Value: ${ttvProfile.label} (${ttvProfile.range})</div>
+<style>body{font-family:Segoe UI,system-ui,sans-serif;margin:40px;color:#0f172a}h1{font-size:22px;margin:0}h2{font-size:14px;color:#64748b;margin:4px 0 24px 0;font-weight:400}.meta{font-size:12px;color:#64748b;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:24px}.section-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;padding:12px 0 6px 0;border-bottom:2px solid #0f172a;margin-top:16px}.highlight{background:#f0fdf4;border:2px solid #22c55e;border-radius:8px;padding:16px;margin:20px 0;text-align:center}.highlight .big{font-size:28px;font-weight:800;color:#16a34a}.highlight .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px}.multiplier{background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:16px;margin:20px 0}.multiplier .big{font-size:22px;font-weight:800;color:#2563eb}.multiplier p{font-size:12px;color:#475569;margin:6px 0 0 0}.header-bar{background:#0f172a;color:white;margin:-40px -40px 24px -40px;padding:20px 40px;display:flex;align-items:center;justify-content:space-between}.header-bar h1{color:white;font-size:18px}.header-bar .sub{color:#94a3b8;font-size:12px}.footer{margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center}
+@media print{body{margin:20px}.highlight,.multiplier{break-inside:avoid}.header-bar{margin:-20px -20px 24px -20px;padding:16px 20px}}</style></head><body>
+<div class="header-bar">
+<div><h1>Ottimate Margin Defense Summary</h1><div class="sub">${pathNames[path]}</div></div>
+<div style="text-align:right"><div style="font-size:11px;color:#94a3b8">Prepared for</div><div style="font-size:14px;font-weight:600">${prospectName || '[Prospect Name]'}</div><div style="font-size:10px;color:#64748b">${new Date().toLocaleDateString()}</div></div>
+</div>
 
 <div class="section-title">Operation Profile</div>
 <table>
@@ -365,14 +366,32 @@ ${row("Payback Period", paybackMonths + " months")}
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100" style={{ fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif" }}>
       {/* Header */}
-      <div className="bg-slate-900 text-white px-6 py-5">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold tracking-tight">Ottimate Grocery ROI Calculator</h1>
-            <p className="text-slate-400 text-xs mt-0.5">Margin Defense Value Analysis</p>
-          </div>
-          <div className="flex items-center gap-2">
+      <div className="bg-slate-900 text-white px-6 py-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-4">
+              <svg viewBox="0 0 2800 1000" className="h-8 w-auto" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#fff" fillRule="evenodd" d="M899.5,522.8c0-56.5,46.7-105.7,100.3-105.7s99.9,49.3,99.9,105.7-46.7,105.4-99.9,105.4-100.3-49.3-100.3-105.4ZM1062,522.8c0-42.8-27.3-72.6-62.2-72.6s-62.5,29.9-62.5,72.6,27.3,72.6,62.5,72.6,62.2-30.2,62.2-72.6ZM1141.4,546.9v-94.9h-37.7v-26.3h5c32.3,0,39.5-16.5,39.5-42.4v-25.2h5.4c13.3,0,19.4-.4,24.8-2.9v66.5h75.8v30.2h-75.8v100.3c0,31.3,14.7,43.9,32.7,43.9s27-7.9,34.5-19.8l25.2,18c-10.8,21.6-33.4,33.8-59.7,33.8-42.8,0-69.7-32-69.7-81.3ZM1308.9,546.9v-94.9h-37.7v-26.3h5c32.3,0,39.5-16.5,39.5-42.4v-25.2h5.4c13.3,0,19.1-.4,24.4-2.9v66.5h75.8v30.2h-75.8v100.3c0,31.3,15.1,43.9,32.7,43.9s27-7.9,34.9-19.8l24.8,18c-10.4,21.6-33.1,33.8-59.7,33.8-42.4,0-69.4-32-69.4-81.3ZM1461.6,421.7h12.2c13.6,0,19.4-.4,24.8-2.5v204.3h-37v-201.8ZM1532,421.7h11.9c13.7,0,19.4-.7,24.8-2.9v43.5c10.8-28.1,34.9-45.3,69.7-45.3s54.3,17.6,61.8,48.2c10.8-29.9,36.3-48.2,72.6-48.2s65.1,28.1,65.1,73.4v132.7h-36.7v-127c0-32.4-12.6-45.3-39.2-45.3s-58.6,23.4-58.6,65.1v107.2h-37v-127c0-32.4-12.6-45.3-38.8-45.3s-58.9,23.4-58.9,65.1v107.2h-36.7v-201.4ZM1866.6,573.1c0-45,43.1-54.7,83.7-59.3,31.3-4,42.8-5.4,42.8-29.1s-12.6-36-40.6-36-42.8,9.7-51.4,28.1l-25.5-16.2c12.6-28.1,43.1-43.5,81.2-43.5s73.3,24.5,73.3,74.4v132h-35.9v-34.9c-10.4,25.9-33.4,39.6-65,39.6s-62.5-19.8-62.5-55ZM1993.8,539v-17.6c-6.8,11.9-17.2,14.4-39.2,17.3-25.2,3.2-52.1,6.1-52.1,32.4s10.8,29.1,34.5,29.1,56.8-18.3,56.8-61.1Z"/>
+                <path fill="#fff" fillRule="evenodd" d="M2076.2,546.9v-94.9h-37.7v-26.3h4.7c32.3,0,39.5-16.5,39.5-42.4v-25.2h5.4c13.7,0,19.4-.4,24.8-2.9v66.5h75.8v30.2h-75.8v100.3c0,31.3,14.7,43.9,32.7,43.9s26.9-7.9,34.5-19.8l25.2,18c-10.8,21.6-33.1,33.8-59.7,33.8-42.8,0-69.4-32-69.4-81.3ZM2212,523.5c0-57.2,43.8-106.5,96-106.5s92,46.4,92,112.6h-151.3c1.1,37,25.5,66.9,66.8,66.9s45.3-13.3,55-36l27.3,15.5c-14.4,31.3-42.8,52.1-82.3,52.1-60.4,0-103.5-47.8-103.5-104.7ZM2249.1,503.7h115c-3.6-30.9-25.2-57.5-57.5-57.5s-53.6,26.6-57.5,57.5Z"/>
+                <path fill="#fff" d="M788.3,431.9c-5.1-11.2-13.1-3.8-16.1,4.4-2.3,5.4-5.2,9.8-9.4,14.2-8.1,8.5-23.4,20.7-34.9,36.3-12.3,15.1-21,36.6-33.9,48.6-5.8,5.2-19.1,10.2-17.4-1.1,1.3-9.5,7.1-19.3,13.3-30.9,68.5-110.2-71.7-232-168.8-142.4-19.5,18.6-32,44.4-34.3,70.8-1.8,19.3,1.3,38.8,9.2,56.4,5.6,13.3,26,42.3,19.5,51.9-11.8,5.5-22.9-14.4-30.9-27.3-5.8-9.4-10.4-17.2-17.1-25.7-7.9-11-27-29.6-31.1-32.5-5.8-4.4-11.3-10.6-14.2-17.8-4.2-9.8-3-18.4-5.7-20.2-.7-.6-1.6-.5-2.4,0-8.3,5-12.9,27.6-7.1,39.2,5.5,14.8,17,23.7,28,34.2,8.8,8.1,17,18.4,23.4,28.9,15.6,25.1,29.4,48.1,55.7,47.1,11.2-.2,23.4-4.9,27-16.3,9.8-36.6-27.9-67.5-29.4-103.2-.7-57.3,47.2-102.3,103.8-89.2,43.2,7.7,78.2,55.2,65.5,106-7,29.2-39.3,58.9-24.2,90,10,17,37.3,18,57.8-3.9,6.1-6.5,10.6-13.7,15.3-21,7.2-11,13.5-22.7,22.2-32,12.5-12.2,45.8-36.5,36.9-64l-.2-.6h0Z"/>
+                <path fill="#fff" d="M650.9,456c-3.6,8.4-10.4,1.1-23.4,2.1-2.6.2-23.1,8.4-22.3-12,1.6-38.2,60.9-25.6,45.7,10Z"/>
+              </svg>
+              <div>
+                <p className="text-slate-400 text-xs">Grocery ROI Calculator</p>
+              </div>
+            </div>
             <input value={prospectName} onChange={e => setProspectName(e.target.value)} placeholder="Prospect name..." className="bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-xs text-white placeholder-slate-500 w-44 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+          </div>
+          <div className="flex gap-2">
+            <button onClick={handleExport} className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-1.5 rounded transition-colors">
+              ↓ Save as PDF
+            </button>
+            <button onClick={handleCSV} className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-4 py-1.5 rounded transition-colors">
+              ↓ Export CSV
+            </button>
+            <button onClick={handleClear} className="bg-slate-800 hover:bg-red-900/50 text-red-400 hover:text-red-300 text-xs font-semibold px-4 py-1.5 rounded border border-slate-700 hover:border-red-700 transition-colors ml-auto">
+              ✕ Clear All
+            </button>
           </div>
         </div>
       </div>
@@ -494,9 +513,13 @@ ${row("Payback Period", paybackMonths + " months")}
           {/* Right: Results Dashboard */}
           <div className="lg:col-span-1">
             <div className="sticky top-4 space-y-4">
-              {/* TMDV Summary */}
+              {/* F7: TMDV Summary */}
               <div className="bg-slate-900 rounded-lg p-5 text-white">
-                <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Total Margin Defense Value</h2>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">F7: Total Margin Defense Value</h2>
+                  <span className="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">Rollup</span>
+                </div>
+                <p className="text-[10px] text-slate-500 mb-4">Sum of all active formulas minus Ottimate investment</p>
                 
                 <div className="space-y-2 mb-4">
                   {f1Active && <div className="flex justify-between text-xs"><span className="text-slate-400">F1 Pricing Variance</span><span className="text-emerald-400 font-semibold tabular-nums">{fmt(f1Total)}</span></div>}
@@ -550,18 +573,6 @@ ${row("Payback Period", paybackMonths + " months")}
                   options={[{ value: "clean", label: "Clean & maintained" }, { value: "moderate", label: "Some cleanup needed" }, { value: "messy", label: "Major cleanup needed" }]} />
               </div>
 
-              {/* Export */}
-              <div className="flex gap-2">
-                <button onClick={handleExport} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-lg transition-colors">
-                  ↓ Save as PDF
-                </button>
-                <button onClick={handleCSV} className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold py-2.5 rounded-lg transition-colors">
-                  ↓ Export CSV
-                </button>
-              </div>
-              <button onClick={handleClear} className="w-full bg-white hover:bg-red-50 text-red-500 hover:text-red-600 text-xs font-semibold py-2 rounded-lg border border-red-200 hover:border-red-300 transition-colors">
-                ✕ Clear All Data
-              </button>
             </div>
           </div>
         </div>
