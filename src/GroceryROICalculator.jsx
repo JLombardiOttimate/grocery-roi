@@ -255,54 +255,68 @@ export default function GroceryROICalculator() {
   // ─── PDF Export ──────────────────────────────────────────────────────────
   const handleExport = useCallback(() => {
     const pathNames = { 1: "Core AP Only", 2: "Core AP + Item Validation", 3: "Core AP + DSD Receiver Match", 4: "Core AP + DSD Receiver + Item Validation" };
-    const lines = [
-      "OTTIMATE GROCERY MARGIN DEFENSE SUMMARY",
-      "═".repeat(50),
-      `Prepared for: ${prospectName || "[Prospect Name]"}`,
-      `Date: ${new Date().toLocaleDateString()}`,
-      `Solution Path: ${pathNames[path]}`,
-      "",
-      "GLOBAL INPUTS",
-      "─".repeat(40),
-      `  Stores: ${stores}`,
-      `  Invoices/Store/Week: ${invPerStore}`,
-      `  Annual Invoice Volume: ${annualVolume.toLocaleString()}`,
-      `  AP Team Size: ${apHeadcount}`,
-      `  AP Hourly Rate: $${apRate}`,
-      `  Net Margin: ${(margin * 100).toFixed(1)}%`,
-      `  Ottimate Annual Cost: ${fmtFull(annualCost)}`,
-      `  Onboarding Cost: ${fmtFull(onboardCost)}`,
-      `  Contract: ${contractYrs} year(s)`,
-      "",
-      "FORMULA RESULTS",
-      "─".repeat(40),
-    ];
-    if (f1Active) lines.push(`  F1 Pricing Variance Recovery:    ${fmtFull(f1Total)}`);
-    lines.push(`  F2 Net Invoice Processing Labor:  ${fmtFull(f2Total)}`);
-    if (f2Year1 !== f2Year2) lines.push(`     (Year 2 steady-state:          ${fmtFull(f2Year2)})`);
-    lines.push(`  F3 Store-Level Ops Recovery:      ${fmtFull(f3Total)}`);
-    if (f4Active) lines.push(`  F4 Vendor Credit Recovery:        ${fmtFull(f4Total)}`);
-    lines.push(`  F5 Month-End Close Efficiency:    ${fmtFull(f5Total)}`);
-    if (newStores > 0) lines.push(`  F6 Multi-Store Scalability:       ${fmtFull(f6Total)}`);
-    lines.push("", "─".repeat(40));
-    lines.push(`  TOTAL MARGIN DEFENSE VALUE:       ${fmtFull(tmdv)}`);
-    lines.push(`  Less: Ottimate Investment:        ${fmtFull(annualCost + annualizedOnboard)}`);
-    lines.push(`  NET ANNUAL VALUE:                 ${fmtFull(netAnnual)}`);
-    lines.push("", `  Payback Period:    ${paybackMonths} months`);
-    lines.push(`  Time-to-Value:     ${ttvProfile.label} (${ttvProfile.range})`);
-    lines.push(`  Revenue Equivalent: ${fmtFull(multiplier)}`);
-    lines.push(`     "This recovery is equivalent to generating`);
-    lines.push(`      ${fmtFull(multiplier)} in new revenue at ${(margin * 100).toFixed(1)}% margins."`);
-    lines.push("", "═".repeat(50));
+    const row = (label, value, bold = false) => `<tr><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;color:#475569;${bold?'font-weight:700;':''}">${label}</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:${typeof value === 'string' && value.startsWith('(') ? '#ef4444' : '#0f172a'};${bold?'font-size:16px;':''}">${value}</td></tr>`;
 
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${prospectName || "Prospect"}_Margin_Defense_Summary.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [path, stores, invPerStore, annualVolume, apHeadcount, apRate, margin, annualCost, onboardCost, contractYrs, prospectName, f1Active, f1Total, f2Total, f2Year1, f2Year2, f3Total, f4Active, f4Total, f5Total, f6Total, newStores, tmdv, annualizedOnboard, netAnnual, paybackMonths, ttvProfile, multiplier]);
+    const formulaRows = [];
+    if (f1Active) formulaRows.push(row("F1: Pricing Variance Recovery", fmtFull(f1Total)));
+    formulaRows.push(row("F2: Net Invoice Processing Labor (Year 1)", fmtFull(f2Total)));
+    if (f2Year1 !== f2Year2) formulaRows.push(row("F2: Net Invoice Processing Labor (Year 2+)", fmtFull(f2Year2)));
+    formulaRows.push(row("F3: Store-Level Ops Recovery", fmtFull(f3Total)));
+    if (f4Active) formulaRows.push(row("F4: Vendor Credit Recovery", fmtFull(f4Total)));
+    formulaRows.push(row("F5: Month-End Close Efficiency", fmtFull(f5Total)));
+    if (f6Total > 0) formulaRows.push(row("F6: Multi-Store Scalability", fmtFull(f6Total)));
+
+    const html = `<!DOCTYPE html><html><head><title>Margin Defense Summary - ${prospectName || 'Prospect'}</title>
+<style>body{font-family:Segoe UI,system-ui,sans-serif;margin:40px;color:#0f172a}h1{font-size:22px;margin:0}h2{font-size:14px;color:#64748b;margin:4px 0 24px 0;font-weight:400}.meta{font-size:12px;color:#64748b;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:24px}.section-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;padding:12px 0 6px 0;border-bottom:2px solid #0f172a;margin-top:16px}.highlight{background:#f0fdf4;border:2px solid #22c55e;border-radius:8px;padding:16px;margin:20px 0;text-align:center}.highlight .big{font-size:28px;font-weight:800;color:#16a34a}.highlight .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px}.multiplier{background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:16px;margin:20px 0}.multiplier .big{font-size:22px;font-weight:800;color:#2563eb}.multiplier p{font-size:12px;color:#475569;margin:6px 0 0 0}.footer{margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center}
+@media print{body{margin:20px}.highlight,.multiplier{break-inside:avoid}}</style></head><body>
+<h1>Ottimate Margin Defense Summary</h1>
+<h2>${pathNames[path]}</h2>
+<div class="meta">Prepared for: <strong>${prospectName || '[Prospect Name]'}</strong> &nbsp;|&nbsp; Date: ${new Date().toLocaleDateString()} &nbsp;|&nbsp; Time-to-Value: ${ttvProfile.label} (${ttvProfile.range})</div>
+
+<div class="section-title">Operation Profile</div>
+<table>
+${row("Store Locations", stores)}
+${row("Annual Invoice Volume", annualVolume.toLocaleString())}
+${row("AP Team Size", apHeadcount + " people")}
+${row("AP Hourly Rate (Loaded)", "$" + apRate + "/hr")}
+${row("Net Margin", (margin * 100).toFixed(1) + "%")}
+</table>
+
+<div class="section-title">Formula Results</div>
+<table>
+${formulaRows.join("\n")}
+</table>
+
+<div class="section-title">Investment & Return</div>
+<table>
+${row("Total Margin Defense Value", fmtFull(tmdv), true)}
+${row("Less: Ottimate Annual Cost", fmtFull(annualCost))}
+${row("Less: Annualized Onboarding", fmtFull(annualizedOnboard))}
+${row("Net Annual Value", fmtFull(netAnnual), true)}
+${row("Payback Period", paybackMonths + " months")}
+</table>
+
+<div class="highlight">
+<div class="label">Net Annual Value</div>
+<div class="big">${fmtFull(netAnnual)}</div>
+</div>
+
+<div class="multiplier">
+<div class="label" style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px">Net Profit Multiplier</div>
+<div class="big">${fmtFull(multiplier)}</div>
+<p>This ${fmtFull(netAnnual)} in annual margin recovery is equivalent to generating <strong>${fmtFull(multiplier)}</strong> in new revenue at ${(margin * 100).toFixed(1)}% margins.</p>
+</div>
+
+<div class="footer">Ottimate Grocery ROI Calculator &nbsp;|&nbsp; Generated ${new Date().toLocaleDateString()} &nbsp;|&nbsp; Confidential</div>
+</body></html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 300);
+    }
+  }, [path, stores, invPerStore, annualVolume, apHeadcount, apRate, margin, annualCost, onboardCost, contractYrs, prospectName, f1Active, f1Total, f2Total, f2Year1, f2Year2, f3Total, f4Active, f4Total, f5Total, f6Total, tmdv, annualizedOnboard, netAnnual, paybackMonths, ttvProfile, multiplier]);
 
   // CSV
   const handleCSV = useCallback(() => {
@@ -323,6 +337,21 @@ export default function GroceryROICalculator() {
     a.href = url; a.download = `${prospectName || "Prospect"}_ROI_Data.csv`; a.click();
     URL.revokeObjectURL(url);
   }, [prospectName, stores, invPerStore, annualVolume, apHeadcount, apRate, margin, annualCost, onboardCost, contractYrs, f1Total, f2Total, f2Year2, f3Total, f4Total, f5Total, f6Total, tmdv, netAnnual, paybackMonths, multiplier]);
+
+  // ─── Clear Data ────────────────────────────────────────────────────────────
+  const handleClear = useCallback(() => {
+    if (!window.confirm("Reset all fields to defaults? This can't be undone.")) return;
+    setPath(4); setStores(10); setInvPerStore(125); setApHeadcount(3); setApRate(28);
+    setMargin(0.02); setAnnualCost(60000); setOnboardCost(0); setContractYrs(1); setProspectName("");
+    setVendorSpend(8000000); setErrorRate(0.012); setIvCatch(0.75); setAccAdj(0.85);
+    setDsdSpend(3000000); setDiscRate(0.04); setDsdCatch(0.85);
+    setManualMin(12); setAutoRate(0.85); setAutoMin(2); setExcMin(8);
+    setCodingPractice("summary"); setMappingHrs(40); setOngoingHrs(1.5);
+    setStoreOpsHrs(5); setGmRate(35); setCreditRate(0.007); setCreditImprove(0.5);
+    setCurOT(12); setAutoOT(3); setOtRate(42); setCurRecon(20); setAutoRecon(6);
+    setAvoidedFTE(0.25); setNewStores(0); setFteCost(52000);
+    setPctDigital("high"); setAvgLineItems("low"); setDataQuality("clean");
+  }, []);
 
   // ─── Path Names ────────────────────────────────────────────────────────────
   const pathOptions = [
@@ -524,12 +553,15 @@ export default function GroceryROICalculator() {
               {/* Export */}
               <div className="flex gap-2">
                 <button onClick={handleExport} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-lg transition-colors">
-                  ↓ Download Summary
+                  ↓ Save as PDF
                 </button>
                 <button onClick={handleCSV} className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold py-2.5 rounded-lg transition-colors">
                   ↓ Export CSV
                 </button>
               </div>
+              <button onClick={handleClear} className="w-full bg-white hover:bg-red-50 text-red-500 hover:text-red-600 text-xs font-semibold py-2 rounded-lg border border-red-200 hover:border-red-300 transition-colors">
+                ✕ Clear All Data
+              </button>
             </div>
           </div>
         </div>
