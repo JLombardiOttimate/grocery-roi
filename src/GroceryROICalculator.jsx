@@ -255,57 +255,140 @@ export default function GroceryROICalculator() {
   // ─── PDF Export ──────────────────────────────────────────────────────────
   const handleExport = useCallback(() => {
     const pathNames = { 1: "Core AP Only", 2: "Core AP + Item Validation", 3: "Core AP + DSD Receiver Match", 4: "Core AP + DSD Receiver + Item Validation" };
-    const row = (label, value, bold = false) => `<tr><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;color:#475569;${bold?'font-weight:700;':''}">${label}</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:${typeof value === 'string' && value.startsWith('(') ? '#ef4444' : '#0f172a'};${bold?'font-size:16px;':''}">${value}</td></tr>`;
+    const kv = (label, value) => `<span class="kv"><span class="k">${label}:</span> <span class="v">${value}</span></span>`;
 
-    const formulaRows = [];
-    if (f1Active) formulaRows.push(row("F1: Pricing Variance Recovery", fmtFull(f1Total)));
-    formulaRows.push(row("F2: Net Invoice Processing Labor (Year 1)", fmtFull(f2Total)));
-    if (f2Year1 !== f2Year2) formulaRows.push(row("F2: Net Invoice Processing Labor (Year 2+)", fmtFull(f2Year2)));
-    formulaRows.push(row("F3: Store-Level Ops Recovery", fmtFull(f3Total)));
-    if (f4Active) formulaRows.push(row("F4: Vendor Credit Recovery", fmtFull(f4Total)));
-    formulaRows.push(row("F5: Month-End Close Efficiency", fmtFull(f5Total)));
-    if (f6Total > 0) formulaRows.push(row("F6: Multi-Store Scalability", fmtFull(f6Total)));
+    // F1 inputs
+    let f1Inputs = "";
+    if (f1Active) {
+      const parts = [];
+      if (hasIV) {
+        parts.push(kv("Vendor Spend", fmtFull(vendorSpend)), kv("Error Rate", (errorRate*100).toFixed(1)+"%"), kv("IV Catch", (ivCatch*100)+"%"), kv("Accuracy Adj", (accAdj*100)+"%"));
+      }
+      if (hasDSD) {
+        parts.push(kv("DSD Spend", fmtFull(dsdSpend)), kv("Discrepancy Rate", (discRate*100).toFixed(1)+"%"), kv("DSD Catch", (dsdCatch*100)+"%"));
+      }
+      f1Inputs = parts.join(" ");
+    }
+
+    // F2 inputs
+    const f2Inputs = [
+      kv("Manual", manualMin+"min"), kv("Auto Rate", (autoRate*100)+"%"), kv("Automated", autoMin+"min"), kv("Exception", excMin+"min"),
+      kv("Coding", codingPractice === "line-item" ? "Line-item" : codingPractice === "summary" ? "Summary splits" : "Mixed"),
+      needsTransition ? kv("Mapping", mappingHrs+"hrs") : "", needsTransition ? kv("Ongoing", ongoingHrs+"hrs/wk") : "",
+    ].filter(Boolean).join(" ");
+
+    // F3 inputs
+    const f3Inputs = [kv("Store Ops", storeOpsHrs+"hrs/wk"), kv("GM Rate", "$"+gmRate+"/hr")].join(" ");
+
+    // F4 inputs
+    const f4Inputs = f4Active ? [kv("Credit Rate", (creditRate*100).toFixed(1)+"%"), kv("Catch Improvement", (creditImprove*100)+"%")].join(" ") : "";
+
+    // F5 inputs
+    const f5Inputs = [kv("Current OT", curOT+"hrs"), kv("Auto OT", autoOT+"hrs"), kv("OT Rate", "$"+otRate), kv("Current Recon", curRecon+"hrs"), kv("Auto Recon", autoRecon+"hrs")].join(" ");
+
+    // F6 inputs
+    const f6Inputs = newStores > 0 ? [kv("Avoided FTE", avoidedFTE), kv("New Stores", newStores+"/yr"), kv("FTE Cost", fmtFull(fteCost))].join(" ") : "";
+
+    const fRow = (num, name, inputs, value, active = true) => {
+      if (!active) return "";
+      const color = value >= 0 ? "#16a34a" : "#ef4444";
+      return `<div class="f-row">
+        <div class="f-header"><span class="f-num">${num}</span><span class="f-name">${name}</span><span class="f-val" style="color:${color}">${fmtFull(value)}</span></div>
+        <div class="f-inputs">${inputs}</div>
+      </div>`;
+    };
 
     const html = `<!DOCTYPE html><html><head><title>Margin Defense Summary - ${prospectName || 'Prospect'}</title>
-<style>body{font-family:Segoe UI,system-ui,sans-serif;margin:40px;color:#0f172a}h1{font-size:22px;margin:0}h2{font-size:14px;color:#64748b;margin:4px 0 24px 0;font-weight:400}.meta{font-size:12px;color:#64748b;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:24px}.section-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;padding:12px 0 6px 0;border-bottom:2px solid #0f172a;margin-top:16px}.highlight{background:#f0fdf4;border:2px solid #22c55e;border-radius:8px;padding:16px;margin:20px 0;text-align:center}.highlight .big{font-size:28px;font-weight:800;color:#16a34a}.highlight .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px}.multiplier{background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:16px;margin:20px 0}.multiplier .big{font-size:22px;font-weight:800;color:#2563eb}.multiplier p{font-size:12px;color:#475569;margin:6px 0 0 0}.header-bar{background:#0f172a;color:white;margin:-40px -40px 24px -40px;padding:20px 40px;display:flex;align-items:center;justify-content:space-between}.header-bar h1{color:white;font-size:18px}.header-bar .sub{color:#94a3b8;font-size:12px}.footer{margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center}
-@media print{body{margin:20px}.highlight,.multiplier{break-inside:avoid}.header-bar{margin:-20px -20px 24px -20px;padding:16px 20px}}</style></head><body>
-<div class="header-bar">
-<div><h1>Ottimate Margin Defense Summary</h1><div class="sub">${pathNames[path]}</div></div>
-<div style="text-align:right"><div style="font-size:11px;color:#94a3b8">Prepared for</div><div style="font-size:14px;font-weight:600">${prospectName || '[Prospect Name]'}</div><div style="font-size:10px;color:#64748b">${new Date().toLocaleDateString()}</div></div>
+<style>
+@page{size:letter;margin:0.4in}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:8.5px;color:#1e293b;line-height:1.4}
+.hdr{background:#0f172a;color:white;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hdr h1{font-size:13px;font-weight:700}.hdr .sub{font-size:9px;color:#94a3b8}
+.hdr .right{text-align:right}.hdr .right .name{font-size:11px;font-weight:600}.hdr .right .date{font-size:8px;color:#94a3b8}
+.cols{display:flex;gap:10px}
+.col-left{flex:1}.col-right{width:200px}
+.section-title{font-size:8px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;padding:4px 0 3px;border-bottom:1.5px solid #0f172a;margin-bottom:5px;margin-top:8px}
+.globals{display:flex;flex-wrap:wrap;gap:2px 12px;margin-bottom:4px}
+.kv{white-space:nowrap}.k{color:#64748b}.v{font-weight:600;color:#1e293b}
+.f-row{border:1px solid #e2e8f0;border-radius:4px;padding:5px 8px;margin-bottom:4px}
+.f-header{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.f-num{background:#0f172a;color:white;font-size:7px;font-weight:700;padding:1px 4px;border-radius:2px}
+.f-name{font-size:8.5px;font-weight:600;flex:1}
+.f-val{font-size:10px;font-weight:800;text-align:right}
+.f-inputs{font-size:7.5px;color:#64748b;display:flex;flex-wrap:wrap;gap:1px 8px}
+.summary-box{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:6px;padding:8px;margin-bottom:6px}
+.s-row{display:flex;justify-content:space-between;padding:2px 0;font-size:8.5px}
+.s-row .s-label{color:#64748b}.s-row .s-val{font-weight:600}
+.s-row.total{border-top:1.5px solid #0f172a;margin-top:3px;padding-top:4px}.s-row.total .s-val{font-size:11px;font-weight:800}
+.nav-box{text-align:center;padding:10px 8px;border-radius:6px;margin-bottom:6px}
+.nav-box.green{background:#f0fdf4;border:1.5px solid #22c55e}.nav-box.blue{background:#eff6ff;border:1.5px solid #3b82f6}
+.nav-box .big{font-weight:800}.nav-box .lbl{font-size:7.5px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
+.nav-box p{font-size:7.5px;color:#475569;margin-top:3px}
+.meta-row{display:flex;gap:6px;margin-bottom:6px}
+.meta-card{flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:6px;text-align:center}
+.meta-card .lbl{font-size:7px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
+.meta-card .val{font-size:11px;font-weight:800;color:#0f172a}
+.meta-card .sub{font-size:7px;color:#94a3b8}
+.footer{text-align:center;font-size:7px;color:#94a3b8;margin-top:8px;padding-top:6px;border-top:1px solid #e2e8f0}
+</style></head><body>
+
+<div class="hdr">
+  <div><h1>Ottimate Margin Defense Summary</h1><div class="sub">${pathNames[path]}</div></div>
+  <div class="right"><div class="name">${prospectName || '[Prospect Name]'}</div><div class="date">${new Date().toLocaleDateString()} &nbsp;|&nbsp; Time-to-Value: ${ttvProfile.label} (${ttvProfile.range})</div></div>
 </div>
+
+<div class="cols">
+<div class="col-left">
 
 <div class="section-title">Operation Profile</div>
-<table>
-${row("Store Locations", stores)}
-${row("Annual Invoice Volume", annualVolume.toLocaleString())}
-${row("AP Team Size", apHeadcount + " people")}
-${row("AP Hourly Rate (Loaded)", "$" + apRate + "/hr")}
-${row("Net Margin", (margin * 100).toFixed(1) + "%")}
-</table>
-
-<div class="section-title">Formula Results</div>
-<table>
-${formulaRows.join("\n")}
-</table>
-
-<div class="section-title">Investment & Return</div>
-<table>
-${row("Total Margin Defense Value", fmtFull(tmdv), true)}
-${row("Less: Ottimate Annual Cost", fmtFull(annualCost))}
-${row("Less: Annualized Onboarding", fmtFull(annualizedOnboard))}
-${row("Net Annual Value", fmtFull(netAnnual), true)}
-${row("Payback Period", paybackMonths + " months")}
-</table>
-
-<div class="highlight">
-<div class="label">Net Annual Value</div>
-<div class="big">${fmtFull(netAnnual)}</div>
+<div class="globals">
+  ${kv("Stores", stores)} ${kv("Inv/Store/Wk", invPerStore)} ${kv("Annual Volume", annualVolume.toLocaleString())}
+  ${kv("AP Team", apHeadcount+" people")} ${kv("AP Rate", "$"+apRate+"/hr")} ${kv("Net Margin", (margin*100).toFixed(1)+"%")}
+  ${kv("Ottimate Annual", fmtFull(annualCost))} ${kv("Onboarding", fmtFull(onboardCost))} ${kv("Contract", contractYrs+"yr")}
 </div>
 
-<div class="multiplier">
-<div class="label" style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px">Net Profit Multiplier</div>
-<div class="big">${fmtFull(multiplier)}</div>
-<p>This ${fmtFull(netAnnual)} in annual margin recovery is equivalent to generating <strong>${fmtFull(multiplier)}</strong> in new revenue at ${(margin * 100).toFixed(1)}% margins.</p>
+<div class="section-title">Formula Results &amp; Key Inputs</div>
+${fRow("F1", "Pricing Variance Recovery", f1Inputs, f1Total, f1Active)}
+${fRow("F2", "Net Invoice Processing Labor" + (f2Year1 !== f2Year2 ? " (Yr1)" : ""), f2Inputs, f2Total, true)}
+${f2Year1 !== f2Year2 ? `<div style="font-size:7.5px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:3px;padding:3px 8px;margin:-2px 0 4px;"><b>Year 2+ steady state:</b> ${fmtFull(f2Year2)} (initial mapping complete) &nbsp;|&nbsp; <b>FTE Equiv:</b> ${fteEquiv} of ${apHeadcount}-person team</div>` : `<div style="font-size:7.5px;color:#475569;margin:-2px 0 4px 0;padding-left:8px"><b>FTE Equiv:</b> ${fteEquiv} of ${apHeadcount}-person team</div>`}
+${fRow("F3", "Store-Level Ops Recovery", f3Inputs, f3Total, true)}
+${fRow("F4", "Vendor Credit Recovery", f4Inputs, f4Total, f4Active)}
+${fRow("F5", "Month-End Close Efficiency", f5Inputs, f5Total, true)}
+${newStores > 0 ? fRow("F6", "Multi-Store Scalability", f6Inputs, f6Total, true) : ""}
+
+</div>
+<div class="col-right">
+
+<div class="section-title">F7: Total Margin Defense Value</div>
+<div class="summary-box">
+  ${f1Active ? `<div class="s-row"><span class="s-label">F1 Pricing Variance</span><span class="s-val">${fmt(f1Total)}</span></div>` : ""}
+  <div class="s-row"><span class="s-label">F2 Invoice Processing</span><span class="s-val" style="color:${f2Total>=0?'#16a34a':'#ef4444'}">${fmt(f2Total)}</span></div>
+  <div class="s-row"><span class="s-label">F3 Store Ops</span><span class="s-val">${fmt(f3Total)}</span></div>
+  ${f4Active ? `<div class="s-row"><span class="s-label">F4 Credits</span><span class="s-val">${fmt(f4Total)}</span></div>` : ""}
+  <div class="s-row"><span class="s-label">F5 Month-End</span><span class="s-val">${fmt(f5Total)}</span></div>
+  ${f6Total > 0 ? `<div class="s-row"><span class="s-label">F6 Scalability</span><span class="s-val">${fmt(f6Total)}</span></div>` : ""}
+  <div class="s-row total"><span class="s-label">Gross TMDV</span><span class="s-val">${fmtFull(tmdv)}</span></div>
+  <div class="s-row"><span class="s-label">Less: Investment</span><span class="s-val" style="color:#ef4444">(${fmtFull(annualCost + annualizedOnboard)})</span></div>
+</div>
+
+<div class="nav-box green">
+  <div class="lbl">Net Annual Value</div>
+  <div class="big" style="font-size:18px;color:${netAnnual>=0?'#16a34a':'#ef4444'}">${fmtFull(netAnnual)}</div>
+</div>
+
+<div class="meta-row">
+  <div class="meta-card"><div class="lbl">Payback</div><div class="val">${paybackMonths}</div><div class="sub">months</div></div>
+  <div class="meta-card"><div class="lbl">Time-to-Value</div><div class="val" style="font-size:9px">${ttvProfile.label}</div><div class="sub">${ttvProfile.range}</div></div>
+</div>
+
+<div class="nav-box blue">
+  <div class="lbl">Net Profit Multiplier</div>
+  <div class="big" style="font-size:15px;color:#2563eb">${fmtFull(multiplier)}</div>
+  <p>This recovery equals generating <b>${fmtFull(multiplier)}</b> in new revenue at ${(margin*100).toFixed(1)}% margins.</p>
+</div>
+
+</div>
 </div>
 
 <div class="footer">Ottimate Grocery ROI Calculator &nbsp;|&nbsp; Generated ${new Date().toLocaleDateString()} &nbsp;|&nbsp; Confidential</div>
@@ -317,7 +400,7 @@ ${row("Payback Period", paybackMonths + " months")}
       printWindow.document.close();
       setTimeout(() => printWindow.print(), 300);
     }
-  }, [path, stores, invPerStore, annualVolume, apHeadcount, apRate, margin, annualCost, onboardCost, contractYrs, prospectName, f1Active, f1Total, f2Total, f2Year1, f2Year2, f3Total, f4Active, f4Total, f5Total, f6Total, tmdv, annualizedOnboard, netAnnual, paybackMonths, ttvProfile, multiplier]);
+  }, [path, stores, invPerStore, annualVolume, apHeadcount, apRate, margin, annualCost, onboardCost, contractYrs, prospectName, f1Active, f1Total, hasIV, hasDSD, vendorSpend, errorRate, ivCatch, accAdj, dsdSpend, discRate, dsdCatch, f2Total, f2Year1, f2Year2, fteEquiv, manualMin, autoRate, autoMin, excMin, codingPractice, needsTransition, mappingHrs, ongoingHrs, f3Total, storeOpsHrs, gmRate, f4Active, f4Total, creditRate, creditImprove, f5Total, curOT, autoOT, otRate, curRecon, autoRecon, f6Total, newStores, avoidedFTE, fteCost, tmdv, annualizedOnboard, netAnnual, paybackMonths, ttvProfile, multiplier]);
 
   // CSV
   const handleCSV = useCallback(() => {
