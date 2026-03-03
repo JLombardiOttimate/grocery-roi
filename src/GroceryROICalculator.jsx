@@ -425,15 +425,15 @@ ${newStores > 0 ? fRow("F6", "Multi-Store Scalability", f6Inputs, f6Total, true)
   // ─── Clear Data ────────────────────────────────────────────────────────────
   const handleClear = useCallback(() => {
     if (!window.confirm("Reset all fields to defaults? This can't be undone.")) return;
-    setPath(4); setStores(10); setInvPerStore(125); setApHeadcount(3); setApRate(28);
-    setMargin(0.02); setAnnualCost(60000); setOnboardCost(0); setContractYrs(1); setProspectName("");
-    setVendorSpend(8000000); setErrorRate(0.012); setIvCatch(0.75); setAccAdj(0.85);
-    setDsdSpend(3000000); setDiscRate(0.04); setDsdCatch(0.85);
-    setManualMin(12); setAutoRate(0.85); setAutoMin(2); setExcMin(8);
+    setPath(1); setStores(0); setInvPerStore(0); setApHeadcount(0); setApRate(0);
+    setMargin(0.02); setAnnualCost(0); setOnboardCost(0); setContractYrs(1); setProspectName("");
+    setVendorSpend(0); setErrorRate(0.012); setIvCatch(0.75); setAccAdj(0.85);
+    setDsdSpend(0); setDiscRate(0.04); setDsdCatch(0.85);
+    setManualMin(0); setAutoRate(0.85); setAutoMin(2); setExcMin(0);
     setCodingPractice("summary"); setMappingHrs(40); setOngoingHrs(1.5);
-    setStoreOpsHrs(5); setGmRate(35); setCreditRate(0.007); setCreditImprove(0.5);
-    setCurOT(12); setAutoOT(3); setOtRate(42); setCurRecon(20); setAutoRecon(6);
-    setAvoidedFTE(0.25); setNewStores(0); setFteCost(52000);
+    setStoreOpsHrs(0); setGmRate(0); setCreditRate(0.007); setCreditImprove(0.5);
+    setCurOT(0); setAutoOT(3); setOtRate(0); setCurRecon(0); setAutoRecon(6);
+    setAvoidedFTE(0.25); setNewStores(0); setFteCost(0);
     setPctDigital("high"); setAvgLineItems("low"); setDataQuality("clean");
   }, []);
 
