@@ -147,53 +147,53 @@ export default function GroceryROICalculator() {
   const [path, setPath] = useState(4);
 
   // Global
-  const [stores, setStores] = useState(10);
-  const [invPerStore, setInvPerStore] = useState(125);
-  const [apHeadcount, setApHeadcount] = useState(3);
-  const [apRate, setApRate] = useState(28);
-  const [margin, setMargin] = useState(0.02);
-  const [annualCost, setAnnualCost] = useState(60000);
+  const [stores, setStores] = useState(0);
+  const [invPerStore, setInvPerStore] = useState(0);
+  const [apHeadcount, setApHeadcount] = useState(0);
+  const [apRate, setApRate] = useState(0);
+  const [margin, setMargin] = useState(0.01);
+  const [annualCost, setAnnualCost] = useState(0);
   const [onboardCost, setOnboardCost] = useState(0);
   const [contractYrs, setContractYrs] = useState(1);
   const [prospectName, setProspectName] = useState("");
 
   // F1
-  const [vendorSpend, setVendorSpend] = useState(8000000);
+  const [vendorSpend, setVendorSpend] = useState(0);
   const [errorRate, setErrorRate] = useState(0.012);
   const [ivCatch, setIvCatch] = useState(0.75);
   const [accAdj, setAccAdj] = useState(0.85);
-  const [dsdSpend, setDsdSpend] = useState(3000000);
+  const [dsdSpend, setDsdSpend] = useState(0);
   const [discRate, setDiscRate] = useState(0.04);
   const [dsdCatch, setDsdCatch] = useState(0.85);
 
   // F2
-  const [manualMin, setManualMin] = useState(12);
+  const [manualMin, setManualMin] = useState(0);
   const [autoRate, setAutoRate] = useState(0.85);
   const [autoMin, setAutoMin] = useState(2);
-  const [excMin, setExcMin] = useState(8);
+  const [excMin, setExcMin] = useState(0);
   const [codingPractice, setCodingPractice] = useState("summary");
   const [mappingHrs, setMappingHrs] = useState(40);
   const [ongoingHrs, setOngoingHrs] = useState(1.5);
 
   // F3
-  const [storeOpsHrs, setStoreOpsHrs] = useState(5);
-  const [gmRate, setGmRate] = useState(35);
+  const [storeOpsHrs, setStoreOpsHrs] = useState(0);
+  const [gmRate, setGmRate] = useState(0);
 
   // F4
   const [creditRate, setCreditRate] = useState(0.007);
   const [creditImprove, setCreditImprove] = useState(0.5);
 
   // F5
-  const [curOT, setCurOT] = useState(12);
+  const [curOT, setCurOT] = useState(0);
   const [autoOT, setAutoOT] = useState(3);
-  const [otRate, setOtRate] = useState(42);
-  const [curRecon, setCurRecon] = useState(20);
+  const [otRate, setOtRate] = useState(0);
+  const [curRecon, setCurRecon] = useState(0);
   const [autoRecon, setAutoRecon] = useState(6);
 
   // F6
   const [avoidedFTE, setAvoidedFTE] = useState(0.25);
   const [newStores, setNewStores] = useState(0);
-  const [fteCost, setFteCost] = useState(52000);
+  const [fteCost, setFteCost] = useState(0);
 
   // Time-to-Value
   const [pctDigital, setPctDigital] = useState("high");
